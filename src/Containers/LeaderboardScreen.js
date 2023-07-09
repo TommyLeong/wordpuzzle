@@ -4,9 +4,11 @@ import styles from './Styles/LeaderboardScreenStyles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useFocusEffect} from '@react-navigation/native';
 import fakeData from '../Contants/fakeData';
+import Share from 'react-native-share';
 
 const LeaderboardScreen = ({navigation}) => {
   const [leaderData, setLeaderData] = useState(fakeData);
+  let [totalScore, setTotalScore] = useState(0);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -16,7 +18,6 @@ const LeaderboardScreen = ({navigation}) => {
   );
 
   const getScore = async () => {
-    let totalScore = 0;
     try {
       const existingScore = await AsyncStorage.getItem('puzzleScore');
       totalScore = existingScore === null ? 0 : parseInt(existingScore);
@@ -38,6 +39,7 @@ const LeaderboardScreen = ({navigation}) => {
         return 0;
       });
 
+      setTotalScore(totalScore);
       setLeaderData([...leaderData]);
     } catch (e) {
       console.log(e);
@@ -63,13 +65,24 @@ const LeaderboardScreen = ({navigation}) => {
     );
   };
 
+  const shareContent = () => {
+    const options = {
+      title: 'PuzzleGame',
+      message: `My score at puzzle game is ${totalScore}`,
+    };
+    Share.open(options)
+      .then(res => {
+        console.log(res);
+      })
+      .catch(err => {
+        err && console.log(err);
+      });
+  };
+
   const renderShareFBbutton = () => {
     return (
       <View>
-        <Button
-          title="Share to Facebook"
-          onPress={() => Alert.alert('Pending development')}
-        />
+        <Button title="Share my score!" onPress={() => shareContent()} />
       </View>
     );
   };
